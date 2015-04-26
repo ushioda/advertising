@@ -1,18 +1,6 @@
 // start from uscreditcard1.dta
 
-duplicates drop mediaid panelisttrackingnumber, force
-
-// delete one weird observation
-
-list if month == "Personalized Mail"
-drop if month == "Personalized Mail"
-
-// year was not specified in June 2007. Fix this.
-
-replace year = 2007 if month == "Jun 2007"
-drop if year == .
-
-// generate time variable
+// generate month variable
 
 gen month1 = .
 replace month1 = 1 if strpos(month, "Jan")
@@ -28,21 +16,40 @@ replace month1 = 10 if strpos(month, "Oct")
 replace month1 = 11 if strpos(month, "Nov")
 replace month1 = 12 if strpos(month, "Dec")
 
+// delete weird observations
+
+list if month == "Personalized Mail"
+drop if month == "Personalized Mail"
+
+// year was not specified in June 2007. Fix this.
+
+replace year = 2007 if month == "Jun 2007"
+drop if year == .
+
+// generate time variable
+
 gen time = ym(year, month1) // time in stata internal form
 
-// convert into panel data
+// drop duplicate samples
 
-sort panelisttrackingnumber mediaid
-egen id = group(panelisttrackingnumber mediaid), label
+duplicates drop mediaid panelisttrackingnumber time, force
 
-tsset id time
+// drop observations without panel id
+
+drop if panelisttrackingnumber == .
+
+gen hhid = panelisttrackingnumber
+sort hhid time mediaid
 
 gen statement = 0
 replace statement = 1 if mailingtype == "Statement Mailing"
 
-sort panelisttrackingnumber time mediaid
 
 // save to 2
+
+// count number of statements per household
+
+/*
 
 drop if statement == 0
 
@@ -52,3 +59,7 @@ egen num_statement_per_hh = sum(ones), by(panelisttrackingnumber)
 duplicates drop panelisttrackingnumber, force
 
 summarize num_statement_per_hh
+
+*/
+
+// create a variable that shows new statement
