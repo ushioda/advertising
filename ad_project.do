@@ -62,4 +62,13 @@ summarize num_statement_per_hh
 
 */
 
-// create a variable that shows new statement
+// create id showing the same creditcard
+
+// sort companyreportformat product
+// egen cardid = group(companyreportformat product)
+
+// check what kind of product there are for chase
+
+tabulate product if strpos(companyreportformat, "Chase")
+tabulate productreportformat if strpos(companyreportformat, "Chase")
+tabulate productfamily if strpos(companyreportformat, "Chase")
