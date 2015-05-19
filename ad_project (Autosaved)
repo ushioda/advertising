@@ -77,3 +77,9 @@ tabulate productfamily if strpos(companyreportformat, "Wells")
 tabulate productfamily if strpos(companyreportformat, "Citi")
 tabulate productfamily if strpos(companyreportformat, "HSBC")
 
+egen statement_recipient = max(statement), by(hhid)
+egen total_statement = sum(statement), by(hhid)
+
+// save 
+
+// save "/Users/y_ushioda/Dropbox/research/advertising/us_creditcard_ad1.dta", replace
