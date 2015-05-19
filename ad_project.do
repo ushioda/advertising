@@ -77,3 +77,30 @@ tabulate productfamily if strpos(companyreportformat, "Wells")
 tabulate productfamily if strpos(companyreportformat, "Citi")
 tabulate productfamily if strpos(companyreportformat, "HSBC")
 
+egen statement_recipient = max(statement), by(hhid)
+egen total_statement = sum(statement), by(hhid)
+
+// save 
+
+// save "/Users/y_ushioda/Dropbox/research/advertising/us_creditcard_ad1.dta", replace
+
+collapse (first) businesstype-time statement-total_statement, by(hhid)
+
+label define order  1 "Less than $15,000" 2 "$15,000 - $24,999" /*
+*/ 3 "$25,000 - $34,999" 4 "$35,000 - $49,999"  5 "$50,000 - $74,999" /*
+*/ 6 "$75,000 - $99,999" 7 "$100,000 - $149,999" 8 "$150,000 - $199,999" /*
+*/ 9 "Over $200,000" 10"Unknown"
+
+encode income, gen(income2) label(order)
+
+la var income2 "Income"
+la var statement_recipient "Statement Ever Received"
+
+tabulate income2 statement_recipient, column nofreq
+tabulate age statement_recipient, column nofreq
+tabulate region statement_recipient, column nofreq
+
+tabout income2 age region statement_recipient using incometable3.txt, /*
+*/ rep cells(col) style(tex)
+
+hist total_statement if total_statement < 11 & total_statement > 0, discrete freq
