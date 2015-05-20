@@ -84,12 +84,16 @@ egen total_statement = sum(statement), by(hhid)
 
 // save "/Users/y_ushioda/Dropbox/research/advertising/us_creditcard_ad1.dta", replace
 
+// following part was created to check how many statements each household receives
+
+/*
+
 collapse (first) businesstype-time statement-total_statement, by(hhid)
 
-label define order  1 "Less than $15,000" 2 "$15,000 - $24,999" /*
-*/ 3 "$25,000 - $34,999" 4 "$35,000 - $49,999"  5 "$50,000 - $74,999" /*
-*/ 6 "$75,000 - $99,999" 7 "$100,000 - $149,999" 8 "$150,000 - $199,999" /*
-*/ 9 "Over $200,000" 10"Unknown"
+label define order  1 "Less than $15,000" 2 "$15,000 - $24,999" ///
+3 "$25,000 - $34,999" 4 "$35,000 - $49,999"  5 "$50,000 - $74,999" ///
+6 "$75,000 - $99,999" 7 "$100,000 - $149,999" 8 "$150,000 - $199,999" ///
+9 "Over $200,000" 10"Unknown"
 
 encode income, gen(income2) label(order)
 
@@ -100,7 +104,48 @@ tabulate income2 statement_recipient, column nofreq
 tabulate age statement_recipient, column nofreq
 tabulate region statement_recipient, column nofreq
 
-tabout income2 age region statement_recipient using incometable3.txt, /*
-*/ rep cells(col) style(tex)
+tabout income2 age region statement_recipient using incometable3.txt, ///
+rep cells(col) style(tex)
 
 hist total_statement if total_statement < 11 & total_statement > 0, discrete freq
+
+*/
+
+// gollowing part was created to check how many households received 
+// statements from multiple firms
+
+/*
+
+drop if statement == 0
+
+sort hhid companyreportformat
+egen hhandcompany = group(hhid companyreportformat)
+
+gen bigcompany = 0
+
+replace bigcompany = 1 if companyreportformat == "American Express"
+replace bigcompany = 1 if companyreportformat == "Bank of America"
+replace bigcompany = 1 if companyreportformat == "Capital One"
+replace bigcompany = 1 if companyreportformat == "Chase"
+replace bigcompany = 1 if companyreportformat == "Citibank"
+replace bigcompany = 1 if companyreportformat == "Discover"
+replace bigcompany = 1 if companyreportformat == "Washington Mutual"
+replace bigcompany = 1 if companyreportformat == "HSBC"
+
+gen bigcompany2 = bigcompany
+replace bigcompany2 = 0 if companyreportformat == "Washington Mutual"
+replace bigcompany2 = 0 if companyreportformat == "HSBC"
+
+collapse (first) businesstype-bigcompany2, by(hhandcompany)
+gen ones = 1
+sort hhid
+egen num_firm_statement = sum(ones), by(hhid)
+drop ones
+collapse (first) businesstype-time statement-num_firm_statement, by(hhid)
+
+tabulate num_firm_statement
+
+save "/Users/y_ushioda/Dropbox/research/advertising/us_creditcardad_hh2.dta"
+
+*/
+
